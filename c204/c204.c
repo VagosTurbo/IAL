@@ -54,16 +54,19 @@ bool solved;
  * @param postfixExpressionLength Ukazatel na aktuální délku výsledného postfixového výrazu
  */
 void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpressionLength ) {
-	if (stack->topIndex != -1){
-		while (stack->array[stack->topIndex] != "("){
-			if (stack->topIndex < 0)
+	if (!Stack_IsEmpty(stack)){
+		char top;
+		Stack_Top(stack, &top);
+		while (top != "("){
+			if (Stack_IsEmpty(stack))
 				return;
-			
-			postfixExpression[*postfixExpressionLength++] = stack->array[stack->topIndex];
-			stack->array[stack->topIndex--] = '\0';
+			Stack_Top(stack, &top);
+			Stack_Pop(stack);
+			postfixExpression[*postfixExpressionLength++] = top;
 		}
-		postfixExpression[*postfixExpressionLength++] = stack->array[stack->topIndex];
-		stack->array[stack->topIndex--] = '\0';
+		Stack_Top(stack, &top);
+		Stack_Pop(stack);
+		postfixExpression[*postfixExpressionLength++] = top;
 	}
 }
 
