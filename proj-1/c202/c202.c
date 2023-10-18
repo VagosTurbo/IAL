@@ -73,7 +73,7 @@ void Stack_Error( int error_code ) {
  */
 void Stack_Init( Stack *stack ) {
 	stack->topIndex = -1;
-	stack->array = (char *) malloc(STACK_SIZE * sizeof(char));
+	stack->array = malloc(STACK_SIZE * sizeof(char));
 	if (stack->array == NULL) {
 		Stack_Error(SERR_INIT);
 	}
@@ -89,11 +89,8 @@ void Stack_Init( Stack *stack ) {
  * @returns true v případě, že je zásobník prázdný, jinak false
  */
 bool Stack_IsEmpty( const Stack *stack ) {
-	if (stack->topIndex == -1) {
-		return true;
-	}
-	else
-		return false;
+
+	return (stack->topIndex == -1) ? true : false;
 }
 
 /**
@@ -131,7 +128,8 @@ bool Stack_IsFull( const Stack *stack ) {
 void Stack_Top( const Stack *stack, char *dataPtr ) {
 	if (Stack_IsEmpty(stack)) {
 		Stack_Error(SERR_TOP);
-	} else {
+	} 
+	else {
 		*dataPtr = stack->array[stack->topIndex];
 	}
 }
@@ -150,9 +148,7 @@ void Stack_Top( const Stack *stack, char *dataPtr ) {
  * @param stack Ukazatel na inicializovanou strukturu zásobníku
  */
 void Stack_Pop( Stack *stack ) {
-	if (Stack_IsEmpty(stack)) {
-		return;
-	} else {
+	if (!Stack_IsEmpty(stack)) {
 		stack->array[stack->topIndex--] = '\0';
 	}
 }

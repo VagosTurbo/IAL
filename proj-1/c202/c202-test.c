@@ -52,7 +52,6 @@ TEST(test_pop_multiple, "Multiple stack pops")
 	Stack_Pop(test_stack);
 	Stack_Pop(test_stack);
 	Stack_Pop(test_stack);
-
 	test_print_stack(test_stack);
 ENDTEST
 

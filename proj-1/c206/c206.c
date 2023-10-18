@@ -306,6 +306,7 @@ void DLL_DeleteAfter( DLList *list ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_DeleteBefore( DLList *list ) {
+	// ak nieje aktivny alebo prvy prvok je aktivny tak skip
 	if (list->activeElement != NULL || list->activeElement != list->firstElement){
 
 		DLLElementPtr deleted_element = list->activeElement->previousElement;
@@ -332,7 +333,6 @@ void DLL_DeleteBefore( DLList *list ) {
  * @param data Hodnota k vložení do seznamu za právě aktivní prvek
  */
 void DLL_InsertAfter( DLList *list, int data ) {
-
 	// pokial existuje aktivny elemnet
 	if (list->activeElement != NULL){
 

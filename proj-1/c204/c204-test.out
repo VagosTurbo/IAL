@@ -3,81 +3,78 @@ C204 - Infix to Postfix Expression Conversion, Basic Tests
 
 [test_01] Upper and lower case characters with plus operator
 Provided infix  : a+B=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: aB+=
+Conversion match: OK
 
 
 [test_02] Digits with minus operator
 Provided infix  : 0-1=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: 01-=
+Conversion match: OK
 
 
 [test_03] Mixed operands with multiplication operator
 Provided infix  : a*0=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: a0*=
+Conversion match: OK
 
 
 [test_04] Mixed operands with division operator
 Provided infix  : B/1=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: B1/=
+Conversion match: OK
 
 
 [test_05] Simple parentheses support
 Provided infix  : (a+b)=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: ab+=
+Conversion match: OK
 
 
 [test_06] Expression evaluation from the left to the right
 Provided infix  : a+b+c=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: ab+c+=
+Conversion match: OK
 
 
 [test_07] Minus operator does not have higher priority than plus
 Provided infix  : a+b-c=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: ab+c-=
+Conversion match: OK
 
 
 [test_08] Plus operator does not have higher priority than minus
 Provided infix  : A-B+C=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: AB-C+=
+Conversion match: OK
 
 
 [test_09] Plus operator does not have higher priority than minus
 Provided infix  : 1*2/3=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: 12*3/=
+Conversion match: OK
 
 
 [test_10] Parentheses change operator priority
 Provided infix  : A+(B-c)=
-[W] Function infix2postfix hasn't been implemented yet.
-
+Expected postfix: ABc-+=
+Conversion match: OK
 
 
 [test_eval_01] Evaluate expression
 expression : (a+b)*(c-d)=
 variables  : a = 5, b = 5, c = 12, d = 2
-[FAILED] eval() call returned false
-eval result: 21894
+eval result: 100
 
 
 [test_eval_02] Evaluate expression
 expression : (a-b)*C=
 variables  : a = 3, b = 5, C = -5
-[FAILED] eval() call returned false
-eval result: 21894
+eval result: 10
 
 
 [test_eval_03] Evaluate expression
 expression : a*b+c/d=
 variables  : a = 10, b = 3, c = 100, d = 5
-[FAILED] eval() call returned false
-eval result: 21894
+eval result: 50
 

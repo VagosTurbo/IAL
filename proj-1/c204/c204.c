@@ -54,20 +54,22 @@ bool solved;
  * @param postfixExpressionLength Ukazatel na aktuální délku výsledného postfixového výrazu
  */
 void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpressionLength ) {
-	if (!Stack_IsEmpty(stack)){
-		char top;
-		Stack_Top(stack, &top);
-		while (top != "("){
-			if (Stack_IsEmpty(stack))
-				return;
-			Stack_Top(stack, &top);
-			Stack_Pop(stack);
-			postfixExpression[*postfixExpressionLength++] = top;
-		}
-		Stack_Top(stack, &top);
-		Stack_Pop(stack);
-		postfixExpression[*postfixExpressionLength++] = top;
+
+	if (Stack_IsEmpty(stack)){
+		return;
 	}
+
+	char top;
+	Stack_Top(stack, &top);
+
+	if (top == '('){
+		Stack_Pop(stack);
+		return;
+	}
+
+	postfixExpression[(*postfixExpressionLength)++] = top;
+	Stack_Pop(stack);
+	untilLeftPar(stack, postfixExpression, postfixExpressionLength);
 }
 
 /**
@@ -87,7 +89,26 @@ void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpre
  * @param postfixExpressionLength Ukazatel na aktuální délku výsledného postfixového výrazu
  */
 void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postfixExpressionLength ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	if (Stack_IsEmpty(stack)){
+		Stack_Push(stack, c);
+		return;
+	}
+
+	char top;
+	Stack_Top(stack, &top);
+	if (top == '('){
+		Stack_Push(stack, c);
+		return;
+	}
+
+	if ((c == '*' || c == '/') && (top == '+' || top == '-')){
+		Stack_Push(stack, c);
+		return;
+	}
+
+	postfixExpression[(*postfixExpressionLength)++] = top;
+	Stack_Pop(stack);
+	doOperation(stack, c, postfixExpression, postfixExpressionLength);
 }
 
 /**
@@ -139,8 +160,51 @@ void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postf
  * @returns znakový řetězec obsahující výsledný postfixový výraz
  */
 char *infix2postfix( const char *infixExpression ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
-	return NULL;
+	Stack stack;
+	Stack_Init(&stack);
+
+	char *postfixExpression = malloc(MAX_LEN * sizeof(char));
+	if (postfixExpression == NULL){
+		Stack_Dispose(&stack);
+		return NULL;
+	}
+	
+	unsigned postfixExpressionLength = 0;
+	int infix_index = 0;
+	char c = infixExpression[infix_index];
+	while (c != '\0'){
+		// ak je operand, pushni ho do vysledneho vyrazu
+		if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
+			postfixExpression[postfixExpressionLength++] = c;
+		}
+		// ak je lava zatvorka, pushni ju na stack
+		else if (c == '('){
+			Stack_Push(&stack, c);
+		}
+		// ak je prava zatvorka, vyprazdni stack az po lavu zatvorku
+		else if (c == ')'){
+			untilLeftPar(&stack, postfixExpression, &postfixExpressionLength);
+		}
+		// ak je operator, zpracuj ho
+		else if (c == '+' || c == '-' || c == '*' || c == '/'){
+			doOperation(&stack, c, postfixExpression, &postfixExpressionLength);
+		}
+		c = infixExpression[++infix_index];
+	}
+	// vyprazdni stack
+	while (!Stack_IsEmpty(&stack)){
+		Stack_Top(&stack, &c);
+		Stack_Pop(&stack);
+		postfixExpression[postfixExpressionLength++] = c;
+	}
+	// prida na koniec '=' a '\0'
+	postfixExpression[postfixExpressionLength++] = '=';
+	postfixExpression[postfixExpressionLength] = '\0';
+
+	// uvolni stack
+	Stack_Dispose(&stack);
+	return postfixExpression;
+	
 }
 
 
@@ -156,7 +220,17 @@ char *infix2postfix( const char *infixExpression ) {
  * @param value hodnota k vložení na zásobník
  */
 void expr_value_push( Stack *stack, int value ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
+	// rozdeli hodnotu na 4 byty
+	char byte1 = (char)(value & 0xFF);
+    char byte2 = (char)((value >> 8) & 0xFF);
+    char byte3 = (char)((value >> 16) & 0xFF);
+    char byte4 = (char)((value >> 24) & 0xFF);
+
+    // vlozi jednotlive byty na zasobnik
+    Stack_Push(stack, byte1);
+    Stack_Push(stack, byte2);
+    Stack_Push(stack, byte3);
+    Stack_Push(stack, byte4);
 }
 
 /**
@@ -172,8 +246,23 @@ void expr_value_push( Stack *stack, int value ) {
  *   výsledné celočíselné hodnoty z vrcholu zásobníku
  */
 void expr_value_pop( Stack *stack, int *value ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
-	*value = 0;
+	char byte1, byte2, byte3, byte4;
+
+	// extrahuje jednotlive byty ze zasobniku
+    Stack_Top(stack, &byte4);
+    Stack_Pop(stack);
+    Stack_Top(stack, &byte3);
+    Stack_Pop(stack);
+    Stack_Top(stack, &byte2);
+    Stack_Pop(stack);
+    Stack_Top(stack, &byte1);
+    Stack_Pop(stack);
+
+    // slozi jednotlive byty do jedne hodnoty
+    *value = ((int)byte1 & 0xFF) |
+             (((int)byte2 & 0xFF) << 8) |
+             (((int)byte3 & 0xFF) << 16) |
+             (((int)byte4 & 0xFF) << 24);
 }
 
 
@@ -200,8 +289,57 @@ void expr_value_pop( Stack *stack, int *value ) {
  * @return výsledek vyhodnocení daného výrazu na základě poskytnutých hodnot proměnných
  */
 bool eval( const char *infixExpression, VariableValue variableValues[], int variableValueCount, int *value ) {
-	solved = false; /* V případě řešení, smažte tento řádek! */
-	return NULL;
+    Stack stack;
+    Stack_Init(&stack);
+
+    
+    char *postfixExpression = infix2postfix(infixExpression);
+    if (postfixExpression == NULL) {
+		Stack_Dispose(&stack);
+        return false;
+    }
+
+	int postfix_index = 0;
+	while (postfixExpression[postfix_index] != '='){
+		char c = postfixExpression[postfix_index];
+		if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
+			// ak je operand, pushni jeho hodnotu na stack
+			for (int i = 0; i < variableValueCount; i++){
+				if (c == variableValues[i].name)
+					expr_value_push(&stack, variableValues[i].value);
+			}
+		}
+		else if (c == '+' || c == '-' || c == '*' || c == '/'){
+			// popne 2 operandy zo stacku
+			int num1, num2;
+			expr_value_pop(&stack, &num2);
+			expr_value_pop(&stack, &num1);
+			int operation_result;
+
+			// vyhodnoti operator
+			if ( c == '+')
+				operation_result = num1 + num2;
+			else if (c == '-')
+				operation_result = num1 - num2;
+			else if (c == '*')
+				operation_result = num1 * num2;
+			else if (c == '/'){
+				// osetrenie delenia nulou
+				if (num2 == 0){
+					Stack_Dispose(&stack);
+					return false;
+				}
+				operation_result = num1 / num2;
+			}
+			
+			expr_value_push(&stack, operation_result);
+		}
+		postfix_index++;
+	}
+	expr_value_pop(&stack, value);
+	Stack_Dispose(&stack);
+	return true;
+
 }
 
 /* Konec c204.c */
