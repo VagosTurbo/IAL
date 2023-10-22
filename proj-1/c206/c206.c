@@ -121,12 +121,13 @@ void DLL_InsertFirst( DLList *list, int data ) {
 	new->data = data;
 	new->previousElement = NULL;
 
-	// ak je prazdne pole
+	// ak je prazdne pole tak nastav novy aj ako posledny
 	if (list->firstElement == NULL){
 		new->nextElement = NULL;
 		list->lastElement = new;
 	}
 	else{
+		// ak nieje prazdne pole tak nastav novy ako prvy
 		new->nextElement = list->firstElement;
 		list->firstElement->previousElement = new;
 	}
@@ -152,12 +153,13 @@ void DLL_InsertLast( DLList *list, int data ) {
 	new->data = data;
 	new->nextElement = NULL;
 
-	// ak je prazdne pole
+	// ak je prazdne pole tak nastav novy aj ako prvy
 	if (list->lastElement == NULL){
 		new->previousElement = NULL;
 		list->firstElement = new;
 	}
 	else{
+		// ak nieje prazdne pole tak nastav novy ako posledny
 		new->previousElement = list->lastElement;
 		list->lastElement->nextElement = new;
 	}
@@ -195,6 +197,7 @@ void DLL_Last( DLList *list ) {
  * @param dataPtr Ukazatel na cílovou proměnnou
  */
 void DLL_GetFirst( DLList *list, int *dataPtr ) {
+	// ak je list prazdny tak error
 	if (list->firstElement == NULL)
 		DLL_Error();
 	else
@@ -209,6 +212,7 @@ void DLL_GetFirst( DLList *list, int *dataPtr ) {
  * @param dataPtr Ukazatel na cílovou proměnnou
  */
 void DLL_GetLast( DLList *list, int *dataPtr ) {
+	// ak je list prazdny tak error
 	if (list->lastElement == NULL)
 		DLL_Error();
 	else 
@@ -231,6 +235,7 @@ void DLL_DeleteFirst( DLList *list ) {
 		if (list->activeElement == list->firstElement)
 			list->activeElement = NULL;
 
+		// ak je prvy element aj posledny tak zrusime aj posledny
 		if (list->firstElement == list->lastElement){
 			list->firstElement = NULL;
 			list->lastElement = NULL;
@@ -259,6 +264,7 @@ void DLL_DeleteLast( DLList *list ) {
 		if (list->lastElement == list->activeElement)
 			list->activeElement = NULL;
 
+		// ak je posledny element aj prvy tak zrus aj prvy
 		if (list->firstElement == list->lastElement){
 			list->firstElement = NULL;
 			list->lastElement = NULL;
@@ -407,6 +413,7 @@ void DLL_InsertBefore( DLList *list, int data ) {
  * @param dataPtr Ukazatel na cílovou proměnnou
  */
 void DLL_GetValue( DLList *list, int *dataPtr ) {
+	// ak list nema aktivny element tak error
 	if (list->activeElement == NULL){
 		DLL_Error();
 	}

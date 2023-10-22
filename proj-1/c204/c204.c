@@ -55,6 +55,7 @@ bool solved;
  */
 void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpressionLength ) {
 
+	// ak je zasobnik prazdny tak skip
 	if (Stack_IsEmpty(stack)){
 		return;
 	}
@@ -62,6 +63,7 @@ void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpre
 	char top;
 	Stack_Top(stack, &top);
 
+	// zapisuje kym na vrchu nieje lava zatvorka
 	if (top == '('){
 		Stack_Pop(stack);
 		return;
@@ -89,6 +91,7 @@ void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpre
  * @param postfixExpressionLength Ukazatel na aktuální délku výsledného postfixového výrazu
  */
 void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postfixExpressionLength ) {
+	// ak je zasobnik prazdny tak pushni operator
 	if (Stack_IsEmpty(stack)){
 		Stack_Push(stack, c);
 		return;
@@ -96,16 +99,20 @@ void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postf
 
 	char top;
 	Stack_Top(stack, &top);
+
+	// ak je na vrchu lava zatvorka tak pushne na stack
 	if (top == '('){
 		Stack_Push(stack, c);
 		return;
 	}
 
+	// pushne na stack len ak je to operator s vyssiou prioritou ak no vrchu zasobniku
 	if ((c == '*' || c == '/') && (top == '+' || top == '-')){
 		Stack_Push(stack, c);
 		return;
 	}
 
+	// zapis do postfix vrchol zasobniku a opakuj kym sa c nebude moct dat do zasobnika
 	postfixExpression[(*postfixExpressionLength)++] = top;
 	Stack_Pop(stack);
 	doOperation(stack, c, postfixExpression, postfixExpressionLength);
@@ -163,6 +170,7 @@ char *infix2postfix( const char *infixExpression ) {
 	Stack stack;
 	Stack_Init(&stack);
 
+	// alokuje pamat pre postfixovy vyraz
 	char *postfixExpression = malloc(MAX_LEN * sizeof(char));
 	if (postfixExpression == NULL){
 		Stack_Dispose(&stack);
@@ -177,6 +185,10 @@ char *infix2postfix( const char *infixExpression ) {
 		if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
 			postfixExpression[postfixExpressionLength++] = c;
 		}
+		// ak je operator, zpracuj ho
+		else if (c == '+' || c == '-' || c == '*' || c == '/'){
+			doOperation(&stack, c, postfixExpression, &postfixExpressionLength);
+		}
 		// ak je lava zatvorka, pushni ju na stack
 		else if (c == '('){
 			Stack_Push(&stack, c);
@@ -184,10 +196,6 @@ char *infix2postfix( const char *infixExpression ) {
 		// ak je prava zatvorka, vyprazdni stack az po lavu zatvorku
 		else if (c == ')'){
 			untilLeftPar(&stack, postfixExpression, &postfixExpressionLength);
-		}
-		// ak je operator, zpracuj ho
-		else if (c == '+' || c == '-' || c == '*' || c == '/'){
-			doOperation(&stack, c, postfixExpression, &postfixExpressionLength);
 		}
 		c = infixExpression[++infix_index];
 	}
@@ -248,7 +256,7 @@ void expr_value_push( Stack *stack, int value ) {
 void expr_value_pop( Stack *stack, int *value ) {
 	char byte1, byte2, byte3, byte4;
 
-	// extrahuje jednotlive byty ze zasobniku
+	// extrahuje jednotlive byty zo zasobniku
     Stack_Top(stack, &byte4);
     Stack_Pop(stack);
     Stack_Top(stack, &byte3);
@@ -258,7 +266,7 @@ void expr_value_pop( Stack *stack, int *value ) {
     Stack_Top(stack, &byte1);
     Stack_Pop(stack);
 
-    // slozi jednotlive byty do jedne hodnoty
+    // zlozi jednotlive byty do jednej hodnoty
     *value = ((int)byte1 & 0xFF) |
              (((int)byte2 & 0xFF) << 8) |
              (((int)byte3 & 0xFF) << 16) |
@@ -292,7 +300,7 @@ bool eval( const char *infixExpression, VariableValue variableValues[], int vari
     Stack stack;
     Stack_Init(&stack);
 
-    
+    // prevedie infixovy vyraz na postfixovy
     char *postfixExpression = infix2postfix(infixExpression);
     if (postfixExpression == NULL) {
 		Stack_Dispose(&stack);
@@ -300,6 +308,7 @@ bool eval( const char *infixExpression, VariableValue variableValues[], int vari
     }
 
 	int postfix_index = 0;
+	// postupne prejde cely postfixovy vyraz
 	while (postfixExpression[postfix_index] != '='){
 		char c = postfixExpression[postfix_index];
 		if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
@@ -327,17 +336,20 @@ bool eval( const char *infixExpression, VariableValue variableValues[], int vari
 				// osetrenie delenia nulou
 				if (num2 == 0){
 					Stack_Dispose(&stack);
+					free(postfixExpression);
 					return false;
 				}
 				operation_result = num1 / num2;
 			}
-			
+			// pushne na stack vysledok
 			expr_value_push(&stack, operation_result);
 		}
 		postfix_index++;
 	}
+	// popne z vrcholu zasobniku finalny vysledok a uvolni pamat
 	expr_value_pop(&stack, value);
 	Stack_Dispose(&stack);
+	free(postfixExpression);
 	return true;
 
 }

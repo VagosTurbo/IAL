@@ -89,7 +89,7 @@ void Stack_Init( Stack *stack ) {
  * @returns true v případě, že je zásobník prázdný, jinak false
  */
 bool Stack_IsEmpty( const Stack *stack ) {
-
+	// ak je topindex -1 tak je zasobnik prazdny
 	return (stack->topIndex == -1) ? true : false;
 }
 
@@ -106,11 +106,8 @@ bool Stack_IsEmpty( const Stack *stack ) {
  * @returns true v případě, že je zásobník plný, jinak false
  */
 bool Stack_IsFull( const Stack *stack ) {
-	if (stack->topIndex == STACK_SIZE - 1 && stack->array[0] != '\0') {
-		return true;
-	}
-	else
-		return false;
+	// ak je topindex na poslednej pozici a zaroven je tam nejaky znak
+	return (stack->topIndex == STACK_SIZE - 1 && stack->array[0] != '\0') ? true : false;
 }
 
 /**
@@ -126,10 +123,12 @@ bool Stack_IsFull( const Stack *stack ) {
  * @param dataPtr Ukazatel na cílovou proměnnou
  */
 void Stack_Top( const Stack *stack, char *dataPtr ) {
+	// ak je zasobnik prazdny tak error
 	if (Stack_IsEmpty(stack)) {
 		Stack_Error(SERR_TOP);
 	} 
 	else {
+		// inak vrat znak z vrcholu zasobniku
 		*dataPtr = stack->array[stack->topIndex];
 	}
 }
@@ -148,6 +147,7 @@ void Stack_Top( const Stack *stack, char *dataPtr ) {
  * @param stack Ukazatel na inicializovanou strukturu zásobníku
  */
 void Stack_Pop( Stack *stack ) {
+	// ak nie je zasobnik prazdny tak zmaz prvok z vrcholu zasobniku
 	if (!Stack_IsEmpty(stack)) {
 		stack->array[stack->topIndex--] = '\0';
 	}
@@ -165,10 +165,12 @@ void Stack_Pop( Stack *stack ) {
  * @param data Znak k vložení
  */
 void Stack_Push( Stack *stack, char data ) {
+	// ak je zasobnik plny tak error
 	if (Stack_IsFull(stack)){
 		Stack_Error(SERR_PUSH);
 	}
 	else {
+		// inak vloz znak na vrchol zasobniku
 		stack->array[++stack->topIndex] = data;
 	}
 }
