@@ -224,7 +224,7 @@ char *infix2postfix( const char *infixExpression ) {
  * k rozdělení a postupné vložení celočíselné (čtyřbytové) hodnoty
  * na vrchol poskytnutého zásobníku.
  *
- * @param stack ukazatel na inicializovanou strukturu zásobníku
+ * @param stack ukazatel na inicializovanou strukturu zásobníku 
  * @param value hodnota k vložení na zásobník
  */
 void expr_value_push( Stack *stack, int value ) {
