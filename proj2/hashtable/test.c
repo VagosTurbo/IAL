@@ -16,7 +16,7 @@ const ht_item_t TEST_DATA[15] = {
 void init_test() {
   printf("Hash Table - testing script\n");
   printf("---------------------------\n");
-  HT_SIZE = 0;
+  HT_SIZE = 13;
   printf("\nSetting HT_SIZE to prime number (%i)\n", HT_SIZE);
   printf("\n");
 }

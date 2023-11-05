@@ -18,6 +18,10 @@
  * možné toto detekovat ve funkci. 
  */
 void bst_init(bst_node_t **tree) {
+  if ((*tree) != NULL) {
+    return;
+  }
+  (*tree) = NULL;
 }
 
 /*
@@ -30,7 +34,21 @@ void bst_init(bst_node_t **tree) {
  * Funkci implementujte rekurzivně bez použité vlastních pomocných funkcí.
  */
 bool bst_search(bst_node_t *tree, char key, int *value) {
-  return false;
+  if (tree == NULL){
+    return false;
+  }
+
+  if (tree->key == key){
+    (*value) = tree->value;
+    return true;
+  }
+  else if (key > tree->key){
+    bst_search((*tree).right, key, value);
+  }
+  else{
+    bst_search((*tree).left, key, value);
+  }
+  return true;
 }
 
 /*
@@ -45,6 +63,54 @@ bool bst_search(bst_node_t *tree, char key, int *value) {
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
 void bst_insert(bst_node_t **tree, char key, int value) {
+  // if tree is empty just 
+    
+
+  if (*tree == NULL){
+    bst_node_t *new_node = malloc(sizeof(bst_node_t));
+    new_node->key = key;
+    new_node->value = value;
+    new_node->left = NULL;
+    new_node->right = NULL;
+    *tree = new_node;
+    return;
+  }
+
+  // if node with the key exists change the value
+  if((*tree)->key == key ){
+      (*tree)->value = value;
+      return;
+    }
+  //now just insert node on its place
+
+  if(key > (*tree)->key){
+    if ((*tree)->right == NULL){
+      bst_node_t *new_node = malloc(sizeof(bst_node_t));
+      new_node->key = key;
+      new_node->value = value;
+      new_node->left = NULL;
+      new_node->right = NULL;
+      (*tree)->right = new_node;
+      return;
+    }
+    else{
+      bst_insert(&(*tree)->right, key, value);
+    }
+  }
+  else if (key < (*tree)->key){
+    if ((*tree)->left == NULL){
+      bst_node_t *new_node = malloc(sizeof(bst_node_t));
+      new_node->key = key;
+      new_node->value = value;
+      new_node->left = NULL;
+      new_node->right = NULL;
+      (*tree)->left = new_node;
+      return;
+    }
+    else{
+      bst_insert(&(*tree)->left, key, value);
+    }
+  }
 }
 
 /*
@@ -61,6 +127,13 @@ void bst_insert(bst_node_t **tree, char key, int value) {
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
 void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
+  if ((*tree)->right == NULL){
+    target->key = (*tree)->key;
+    target->value = (*tree)->value;
+    free((*tree));
+  }
+  else 
+    bst_replace_by_rightmost(target, &(*tree));
 }
 
 /*
@@ -77,6 +150,23 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
  * použití vlastních pomocných funkcí.
  */
 void bst_delete(bst_node_t **tree, char key) {
+  int value;
+  if (!bst_search((*tree), key, &value)){
+    return;
+  }
+  if((*tree)->key == key){
+    if((*tree)->right != NULL && (*tree)->left != NULL){
+      bst_node_t rightmost;
+      bst_replace_by_rightmost(&rightmost, &(*tree)->left);
+    }
+
+  }
+  if(value > (*tree)->value){
+    bst_delete(&(*tree)->right, key);
+  }
+  else{
+    bst_delete(&(*tree)->left, key);
+  }
 }
 
 /*
