@@ -34,22 +34,23 @@ void bst_init(bst_node_t **tree) {
  * Funkci implementujte rekurzivně bez použité vlastních pomocných funkcí.
  */
 bool bst_search(bst_node_t *tree, char key, int *value) {
-  if (tree == NULL){
+  bst_node_t *node = tree;
+  if (node == NULL) {
     return false;
   }
 
-  if (tree->key == key){
-    (*value) = tree->value;
+  if (node->key == key) {
+    (*value) = node->value;
     return true;
-  }
-  else if (key > tree->key){
-    bst_search((*tree).right, key, value);
-  }
-  else{
-    bst_search((*tree).left, key, value);
-  }
-  return true;
+  } 
+  else if (key > node->key) 
+    return bst_search(node->right, key, value);
+  else 
+    return bst_search(node->left, key, value);
+  
 }
+
+
 
 /*
  * Vložení uzlu do stromu.
@@ -63,10 +64,11 @@ bool bst_search(bst_node_t *tree, char key, int *value) {
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
 void bst_insert(bst_node_t **tree, char key, int value) {
-  // if tree is empty just 
-    
-
-  if (*tree == NULL){
+  bst_node_t *current = (*tree);
+  bst_node_t *parent = NULL;
+  
+  // if tree is empty just insert it
+  if (current == NULL){
     bst_node_t *new_node = malloc(sizeof(bst_node_t));
     new_node->key = key;
     new_node->value = value;
@@ -77,40 +79,45 @@ void bst_insert(bst_node_t **tree, char key, int value) {
   }
 
   // if node with the key exists change the value
-  if((*tree)->key == key ){
-      (*tree)->value = value;
+  if(current->key == key ){
+      current->value = value;
       return;
     }
-  //now just insert node on its place
 
-  if(key > (*tree)->key){
-    if ((*tree)->right == NULL){
+    
+    parent = current;
+    if (key > current->key){
+      bst_insert(&current->right, key, value);
+      return;
+    }
+    else {
+      bst_insert(&current->left, key, value);
+      return;
+    }
+
+    
+    if (key > parent->key){
       bst_node_t *new_node = malloc(sizeof(bst_node_t));
+      if (new_node == NULL)
+        return;
+
       new_node->key = key;
       new_node->value = value;
       new_node->left = NULL;
       new_node->right = NULL;
-      (*tree)->right = new_node;
-      return;
+      parent->right = new_node;
     }
     else{
-      bst_insert(&(*tree)->right, key, value);
-    }
-  }
-  else if (key < (*tree)->key){
-    if ((*tree)->left == NULL){
       bst_node_t *new_node = malloc(sizeof(bst_node_t));
+      if(new_node == NULL)
+        return;
+
       new_node->key = key;
       new_node->value = value;
       new_node->left = NULL;
       new_node->right = NULL;
-      (*tree)->left = new_node;
-      return;
+      parent->right = new_node;
     }
-    else{
-      bst_insert(&(*tree)->left, key, value);
-    }
-  }
 }
 
 /*
@@ -127,14 +134,20 @@ void bst_insert(bst_node_t **tree, char key, int value) {
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
 void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
-  if ((*tree)->right == NULL){
-    target->key = (*tree)->key;
-    target->value = (*tree)->value;
-    free((*tree));
+  bst_node_t *node = (*tree);
+
+  if (node->right == NULL) {
+    target->key = node->key;
+    target->value = node->value;
+    bst_node_t *temp = node;
+    // Update the parent's pointer
+    *tree = node->left; 
+    free(temp);
+  } else {
+    bst_replace_by_rightmost(target, &(node->right));
   }
-  else 
-    bst_replace_by_rightmost(target, &(*tree));
 }
+
 
 /*
  * Odstranění uzlu ze stromu.
@@ -151,23 +164,35 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
  */
 void bst_delete(bst_node_t **tree, char key) {
   int value;
-  if (!bst_search((*tree), key, &value)){
-    return;
-  }
-  if((*tree)->key == key){
-    if((*tree)->right != NULL && (*tree)->left != NULL){
-      bst_node_t rightmost;
-      bst_replace_by_rightmost(&rightmost, &(*tree)->left);
-    }
 
+  if (!bst_search(*tree, key, &value)) {
+    return; // Key not found, nothing to delete
   }
-  if(value > (*tree)->value){
-    bst_delete(&(*tree)->right, key);
+
+  if (*tree == NULL) {
+    return; // Key not found, nothing to delete
   }
-  else{
+
+  if (key < (*tree)->key) {
     bst_delete(&(*tree)->left, key);
+  } else if (key > (*tree)->key) {
+    bst_delete(&(*tree)->right, key);
+  } else {
+    // Found the node to delete
+    if ((*tree)->left == NULL) {
+      bst_node_t *temp = *tree;
+      *tree = (*tree)->right;
+      free(temp);
+    } else if ((*tree)->right == NULL) {
+      bst_node_t *temp = *tree;
+      *tree = (*tree)->left;
+      free(temp);
+    } else {
+      bst_replace_by_rightmost(*tree, &(*tree)->left);
+    }
   }
 }
+
 
 /*
  * Zrušení celého stromu.
@@ -179,6 +204,15 @@ void bst_delete(bst_node_t **tree, char key) {
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
 void bst_dispose(bst_node_t **tree) {
+  if ((*tree) == NULL){
+    return;
+  }
+
+  bst_dispose(&(*tree)->left);
+  bst_dispose(&(*tree)->right);
+
+  free((*tree));
+  (*tree) = NULL;
 }
 
 /*
@@ -189,6 +223,12 @@ void bst_dispose(bst_node_t **tree) {
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
 void bst_preorder(bst_node_t *tree, bst_items_t *items) {
+  if(tree != NULL){
+    bst_add_node_to_items(tree, items);
+    bst_preorder(tree->left, items);
+    bst_preorder(tree->right, items);
+  }
+  
 }
 
 /*
@@ -199,6 +239,11 @@ void bst_preorder(bst_node_t *tree, bst_items_t *items) {
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
 void bst_inorder(bst_node_t *tree, bst_items_t *items) {
+  if (tree != NULL){
+    bst_inorder(tree->left, items);
+    bst_add_node_to_items(tree, items);
+    bst_inorder(tree->right, items);
+  }
 }
 
 /*
@@ -209,4 +254,9 @@ void bst_inorder(bst_node_t *tree, bst_items_t *items) {
  * Funkci implementujte rekurzivně bez použití vlastních pomocných funkcí.
  */
 void bst_postorder(bst_node_t *tree, bst_items_t *items) {
+  if (tree != NULL){
+    bst_postorder(tree->left, items);
+    bst_postorder(tree->right, items);
+    bst_add_node_to_items(tree, items);
+  }
 }
