@@ -12,6 +12,10 @@ const int additional_data_count = 6;
 const char additional_keys[] = {'S', 'R', 'Q', 'P', 'X', 'Y', 'Z'};
 const int additional_values[] = {10, 10, 10, 10, 10, 10};
 
+const int rightmost_data_count = 7;
+const char rightmost_keys[] = {'L', 'A', 'K', 'E', 'F', 'D', 'M'};
+const int rightmost_values[] = {12, 1, 11, 5, 6, 4, 13};
+
 const int traversal_data_count = 5;
 const char traversal_keys[] = {'D', 'B', 'A', 'C', 'E'};
 const int traversal_values[] = {1, 2, 3, 4, 5};
@@ -36,6 +40,7 @@ int tests_passed = 0;
 int exa_tests_passed = 0;
 int tests_failed;
 int exa_tests_failed;
+int test_count = 0;
 
 void init_test() {
   printf("Binary Search Tree - testing script\n");
@@ -53,6 +58,7 @@ bst_dispose(&test_tree);
 ENDTEST
 
 TEST(test_tree_search_empty, "Search in an empty tree (A)")
+test_count++;
 bst_init(&test_tree);
 int result;
 bool bool_res;
@@ -69,6 +75,7 @@ reset_color();
 ENDTEST
 
 TEST(test_tree_insert_root, "Insert an item (H,1)")
+test_count++;
 bst_init(&test_tree);
 bst_insert(&test_tree, 'H', 1);
 bst_print_tree(test_tree);
@@ -87,6 +94,7 @@ reset_color();
 ENDTEST
 
 TEST(test_tree_search_root, "Search in a single node tree (H)")
+test_count++;
 bst_init(&test_tree);
 bst_insert(&test_tree, 'H', 1);
 int result;
@@ -105,6 +113,7 @@ reset_color();
 ENDTEST
 
 TEST(test_tree_update_root, "Update a node in a single node tree (H,1)->(H,8)")
+test_count++;
 bst_init(&test_tree);
 bst_insert(&test_tree, 'H', 1);
 bst_print_tree(test_tree);
@@ -171,6 +180,7 @@ bst_print_tree(test_tree);
 ENDTEST
 
 TEST(test_tree_search, "Search for an item deeper in the tree (A)")
+test_count++;
 bst_init(&test_tree);
 bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
 int result;
@@ -189,6 +199,7 @@ bst_print_tree(test_tree);
 ENDTEST
 
 TEST(test_tree_search_missing, "Search for a missing key (X)")
+test_count++;
 bst_init(&test_tree);
 bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
 int result;
@@ -207,6 +218,7 @@ bst_print_tree(test_tree);
 ENDTEST
 
 TEST(test_tree_delete_leaf, "Delete a leaf node (A)")
+test_count++;
 bst_init(&test_tree);
 bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
 bst_print_tree(test_tree);
@@ -230,6 +242,7 @@ bst_print_tree(test_tree);
 ENDTEST
 
 TEST(test_tree_delete_left_subtree, "Delete a node with only left subtree (R)")
+test_count++;
 bst_init(&test_tree);
 bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
 bst_insert_many(&test_tree, additional_keys, additional_values,
@@ -256,6 +269,7 @@ ENDTEST
 
 TEST(test_tree_delete_right_subtree,
      "Delete a node with only right subtree (X)")
+test_count++;
 bst_init(&test_tree);
 bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
 bst_insert_many(&test_tree, additional_keys, additional_values,
@@ -282,6 +296,7 @@ bst_print_tree(test_tree);
 ENDTEST
 
 TEST(test_tree_delete_both_subtrees, "Delete a node with both subtrees (L)")
+test_count++;
 bst_init(&test_tree);
 bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
 bst_insert_many(&test_tree, additional_keys, additional_values,
@@ -307,6 +322,62 @@ reset_color();
 bst_print_tree(test_tree);
 ENDTEST
 
+TEST(test_tree_delete_rightmost_left_subtree, "Delete rightmost non-leaf node with left subtree (L)")
+test_count++;
+bst_init(&test_tree);
+bst_insert_many(&test_tree, rightmost_keys, rightmost_values, rightmost_data_count);
+bst_print_tree(test_tree);
+bst_delete(&test_tree, 'L');
+int result;
+int result2;
+bool bool_res;
+bool bool_res2;
+bool bool_res3;
+bool bool_res4;
+bool_res = bst_search(test_tree, 'L', &result);
+bool_res2 = bst_search(test_tree, 'K', &result2);
+bool_res3 = bst_search(test_tree, 'A', &result2);
+bool_res4 = bst_search(test_tree, 'F', &result2);
+if (bool_res4 == true && bool_res3 == true && bool_res2 == true && bool_res == false){
+  green();
+  printf("Node L was deleted correctly: [TEST PASSED ✓]\n\n");
+  tests_passed++;
+} else {
+  red();
+  printf("Node L was NOT deleted correctly: [TEST FAILED ☓]\n\n");
+}
+reset_color();
+bst_print_tree(test_tree);
+ENDTEST
+
+TEST(test_tree_delete_rightmost_first_node, "Delete righmost node right after target node with no children (E)")
+test_count++;
+bst_init(&test_tree);
+bst_insert_many(&test_tree, rightmost_keys, rightmost_values, rightmost_data_count);
+bst_print_tree(test_tree);
+bst_delete(&test_tree, 'E');
+int result;
+int result2;
+bool bool_res;
+bool bool_res2;
+bool bool_res3;
+bool bool_res4;
+bool_res = bst_search(test_tree, 'E', &result);
+bool_res2 = bst_search(test_tree, 'D', &result2);
+bool_res3 = bst_search(test_tree, 'F', &result2);
+bool_res4 = (test_tree->left->right->left->left == NULL);
+if (bool_res4 == true && bool_res3 == true && bool_res2 == true && bool_res == false){
+  green();
+  printf("Node E was deleted correctly: [TEST PASSED ✓]\n\n");
+  tests_passed++;
+} else {
+  red();
+  printf("Node E was NOT deleted correctly: [TEST FAILED ☓]\n\n");
+}
+reset_color();
+bst_print_tree(test_tree);
+ENDTEST
+
 TEST(test_tree_delete_missing, "Delete a node that doesn't exist (U)")
 bst_init(&test_tree);
 bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
@@ -324,6 +395,7 @@ bst_print_tree(test_tree);
 ENDTEST
 
 TEST(test_tree_delete_root, "Delete the root node (H)")
+test_count++;
 bst_init(&test_tree);
 bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
 bst_print_tree(test_tree);
@@ -710,6 +782,8 @@ int main(int argc, char *argv[]) {
   test_tree_delete_left_subtree();
   test_tree_delete_right_subtree();
   test_tree_delete_both_subtrees();
+  test_tree_delete_rightmost_left_subtree();
+  test_tree_delete_rightmost_first_node();
   test_tree_delete_missing();
   test_tree_delete_root();
   test_tree_dispose_filled();
@@ -717,7 +791,7 @@ int main(int argc, char *argv[]) {
   test_tree_inorder();
   test_tree_postorder();
   
-  tests_failed = 11 - tests_passed;
+  tests_failed = test_count - tests_passed;
   printf("\n");
   printf("---------- TESTS SUMMARY ----------\n");
   printf("|                                 |\n");
@@ -750,5 +824,3 @@ int main(int argc, char *argv[]) {
   print_exa_tests();
 #endif // EXA
 }
-
-/* author ~ xcuprm01 */

@@ -1,6 +1,8 @@
 /*
  * Binární vyhledávací strom — iterativní varianta
  *
+ * Autor: Boris Semanco - xseman06
+ *
  * S využitím datových typů ze souboru btree.h, zásobníku ze souboru stack.h 
  * a připravených koster funkcí implementujte binární vyhledávací 
  * strom bez použití rekurze.
@@ -20,7 +22,8 @@
  * možné toto detekovat ve funkci. 
  */
 void bst_init(bst_node_t **tree) {
-  if ((*tree) != NULL) {
+  // initiliaze only if the tree wasn't initiliazed yet
+  if ((*tree) == NULL) {
     return;
   }
   (*tree) = NULL;
@@ -38,10 +41,12 @@ void bst_init(bst_node_t **tree) {
 bool bst_search(bst_node_t *tree, char key, int *value) {
   bst_node_t *current = tree;
   while(current != NULL){
+    // if a node with the key was found return true and set the value to value of the node
     if (current->key == key){
       (*value) = current->value;
       return true;
     }
+    // if searched key is greater then the key of current node got to right subtree else left
     else if (key > current->key){
       current = current->right;
     }
@@ -64,16 +69,17 @@ bool bst_search(bst_node_t *tree, char key, int *value) {
  * Funkci implementujte iterativně bez použití vlastních pomocných funkcí.
  */
 void bst_insert(bst_node_t **tree, char key, int value) {
-  // if tree is empty just 
-    bst_node_t *new_node = malloc(sizeof(bst_node_t));
-    if (new_node == NULL)
-      return;
+  // prepare a new node 
+  bst_node_t *new_node = malloc(sizeof(bst_node_t));
+  if (new_node == NULL)
+    return;
 
-    new_node->key = key;
-    new_node->value = value;
-    new_node->left = NULL;
-    new_node->right = NULL;
+  new_node->key = key;
+  new_node->value = value;
+  new_node->left = NULL;
+  new_node->right = NULL;
 
+  // if tree is empty just insert it
   if (*tree == NULL){
     *tree = new_node;
     return;
@@ -89,7 +95,7 @@ void bst_insert(bst_node_t **tree, char key, int value) {
         free(new_node);
         return;
       }
-    
+    // stores current to parent and change current
     parent = current;
     if (key > current->key)
       current = current->right;
@@ -97,6 +103,7 @@ void bst_insert(bst_node_t **tree, char key, int value) {
       current = current->left;
   }
 
+  // insert the new node on its position
   if (key > parent->key)
     parent->right = new_node;
   else
@@ -119,11 +126,21 @@ void bst_insert(bst_node_t **tree, char key, int value) {
 void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
   bst_node_t *parent = NULL;
   bst_node_t *current = (*tree);
+
+  // Check if the tree has a right child before proceeding
+    if (current->right == NULL) {
+        // There is no right child
+        // Update the target as needed or handle the scenario based on the context
+        // For instance, if it's intended to replace the root with its left child (if exists), it can be handled here
+        return;
+    }
+
   while(current->right != NULL){
     // move to the rightmost
     parent = current;
     current = current->right;
   }
+  // change the target's values and delete the rightmost node
   parent->right = NULL;
   target->key = current->key;
   target->value = current->value;
@@ -145,12 +162,14 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
  */
 void bst_delete(bst_node_t **tree, char key) {
   int value;
+  // if tree is empty or it doesn't contain a node with the key do nothing
   if(!bst_search((*tree), key, &value)){
     return;
   }
   bst_node_t *parent = NULL;
   bst_node_t *current = (*tree);
   
+  // move to the position of the node to be deleted
   while(current != NULL){
     if (current->key == key)
       break;
@@ -189,7 +208,7 @@ void bst_delete(bst_node_t **tree, char key) {
     free(current);
   }
 
-  // if current node has both subtrees
+  // if current node has both subtrees replace the values with the rightmost node of the left subtree
   else {
     bst_replace_by_rightmost(current, &current->left);
   }
@@ -209,28 +228,30 @@ void bst_delete(bst_node_t **tree, char key) {
  * vlastních pomocných funkcí.
  */
 void bst_dispose(bst_node_t **tree) {
+  bst_node_t *current = (*tree);
+
+  // if a tree is already empty do nothing
+  if (current == NULL)
+    return;
+
+  // allocating memory and initing stack
   stack_bst_t *stack = malloc(sizeof (stack_bst_t));
   if (stack == NULL)
     return;
   stack_bst_init(stack);
-  bst_node_t *current = (*tree);
-
-  if (current == NULL){
-    free(stack);
-    return;
-  }
-
+  // pushing on stack root of the tree
   stack_bst_push(stack, current);
 
   while(!stack_bst_empty(stack)){
     current = stack_bst_pop(stack);
 
+    // if it has left subtree push it to the stack
     if (current->left != NULL)
       stack_bst_push(stack, current->left);
-
+    // if it has right subtree push it to the stack
     if (current->right != NULL)
       stack_bst_push(stack, current->right);
-
+    // remove current node
     free(current);
   }
   free(stack);

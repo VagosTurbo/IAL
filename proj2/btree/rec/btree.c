@@ -1,6 +1,8 @@
 /*
  * Binární vyhledávací strom — rekurzivní varianta
  *
+ * Autor: Boris Semanco - xseman06
+ *
  * S využitím datových typů ze souboru btree.h a připravených koster funkcí
  * implementujte binární vyhledávací strom pomocí rekurze.
  */
@@ -18,7 +20,8 @@
  * možné toto detekovat ve funkci. 
  */
 void bst_init(bst_node_t **tree) {
-  if ((*tree) != NULL) {
+  // initiliaze only if the tree wasn't initiliazed yet
+  if ((*tree) == NULL) {
     return;
   }
   (*tree) = NULL;
@@ -35,14 +38,17 @@ void bst_init(bst_node_t **tree) {
  */
 bool bst_search(bst_node_t *tree, char key, int *value) {
   bst_node_t *node = tree;
+  // if the tree is empty, there's no need to search
   if (node == NULL) {
     return false;
   }
-
+  
+  // if a node with the key was found return true and set the value to value of the node
   if (node->key == key) {
     (*value) = node->value;
     return true;
-  } 
+  }
+  // if searched key is greater then the key of current node got to right subtree else left
   else if (key > node->key) 
     return bst_search(node->right, key, value);
   else 
@@ -65,9 +71,9 @@ bool bst_search(bst_node_t *tree, char key, int *value) {
  */
 void bst_insert(bst_node_t **tree, char key, int value) {
   bst_node_t *current = (*tree);
-  bst_node_t *parent = NULL;
+  // bst_node_t *parent = NULL;
   
-  // if tree is empty just insert it
+  // if the node is null insert the new node on this place
   if (current == NULL){
     bst_node_t *new_node = malloc(sizeof(bst_node_t));
     new_node->key = key;
@@ -84,40 +90,15 @@ void bst_insert(bst_node_t **tree, char key, int value) {
       return;
     }
 
-    
-    parent = current;
-    if (key > current->key){
-      bst_insert(&current->right, key, value);
-      return;
-    }
-    else {
-      bst_insert(&current->left, key, value);
-      return;
-    }
-
-    
-    if (key > parent->key){
-      bst_node_t *new_node = malloc(sizeof(bst_node_t));
-      if (new_node == NULL)
-        return;
-
-      new_node->key = key;
-      new_node->value = value;
-      new_node->left = NULL;
-      new_node->right = NULL;
-      parent->right = new_node;
-    }
-    else{
-      bst_node_t *new_node = malloc(sizeof(bst_node_t));
-      if(new_node == NULL)
-        return;
-
-      new_node->key = key;
-      new_node->value = value;
-      new_node->left = NULL;
-      new_node->right = NULL;
-      parent->right = new_node;
-    }
+  // if key is greater then current key go to right else left
+  if (key > current->key){
+    bst_insert(&current->right, key, value);
+    return;
+  }
+  else {
+    bst_insert(&current->left, key, value);
+    return;
+  }
 }
 
 /*
@@ -136,14 +117,19 @@ void bst_insert(bst_node_t **tree, char key, int value) {
 void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
   bst_node_t *node = (*tree);
 
+  // if it is at the rightest position
   if (node->right == NULL) {
+    // sets target values to the rightest noeds values
     target->key = node->key;
     target->value = node->value;
+    // store the node to temp variable for deletion
     bst_node_t *temp = node;
-    // Update the parent's pointer
+    // set the current node's left child as the new subtree eliminating the rightmost node
     *tree = node->left; 
     free(temp);
-  } else {
+  } 
+  // if it isn't at the rightest position go to right subtree
+  else {
     bst_replace_by_rightmost(target, &(node->right));
   }
 }
@@ -165,29 +151,34 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
 void bst_delete(bst_node_t **tree, char key) {
   int value;
 
+  // no node with the key, nothing to delete
   if (!bst_search(*tree, key, &value)) {
-    return; // Key not found, nothing to delete
+    return; 
   }
 
-  if (*tree == NULL) {
-    return; // Key not found, nothing to delete
-  }
-
+  // moving in the tree to the right position
   if (key < (*tree)->key) {
     bst_delete(&(*tree)->left, key);
-  } else if (key > (*tree)->key) {
+  } 
+  else if (key > (*tree)->key) {
     bst_delete(&(*tree)->right, key);
-  } else {
-    // Found the node to delete
+  } 
+  else {
+    // found the node to delete
     if ((*tree)->left == NULL) {
       bst_node_t *temp = *tree;
+      // deletion by replacing with right child
       *tree = (*tree)->right;
       free(temp);
-    } else if ((*tree)->right == NULL) {
+    } 
+    else if ((*tree)->right == NULL) {
       bst_node_t *temp = *tree;
+      // deletion by replacing with left child
       *tree = (*tree)->left;
       free(temp);
-    } else {
+    } 
+    else {
+      // replace the data of the current node with the data of the rightmost node in the left subtree
       bst_replace_by_rightmost(*tree, &(*tree)->left);
     }
   }
@@ -208,6 +199,7 @@ void bst_dispose(bst_node_t **tree) {
     return;
   }
 
+  // go through right and left subtrees and delete them all
   bst_dispose(&(*tree)->left);
   bst_dispose(&(*tree)->right);
 
