@@ -20,10 +20,6 @@
  * možné toto detekovat ve funkci. 
  */
 void bst_init(bst_node_t **tree) {
-  // initiliaze only if the tree wasn't initiliazed yet
-  if ((*tree) == NULL) {
-    return;
-  }
   (*tree) = NULL;
 }
 

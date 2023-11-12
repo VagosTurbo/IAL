@@ -22,10 +22,6 @@
  * možné toto detekovat ve funkci. 
  */
 void bst_init(bst_node_t **tree) {
-  // initiliaze only if the tree wasn't initiliazed yet
-  if ((*tree) == NULL) {
-    return;
-  }
   (*tree) = NULL;
 }
 
@@ -127,21 +123,22 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
   bst_node_t *parent = NULL;
   bst_node_t *current = (*tree);
 
-  // Check if the tree has a right child before proceeding
-    if (current->right == NULL) {
-        // There is no right child
-        // Update the target as needed or handle the scenario based on the context
-        // For instance, if it's intended to replace the root with its left child (if exists), it can be handled here
-        return;
-    }
+  if (current == NULL)
+    return;
 
+  // move to the rightmost
   while(current->right != NULL){
-    // move to the rightmost
     parent = current;
     current = current->right;
   }
+
+  // if the rightmost is the root of the tree change the root
+  if (current == (*tree))
+    (*tree) = current->left;
+  else
+    parent->right = current->left;
+
   // change the target's values and delete the rightmost node
-  parent->right = NULL;
   target->key = current->key;
   target->value = current->value;
   free(current);
